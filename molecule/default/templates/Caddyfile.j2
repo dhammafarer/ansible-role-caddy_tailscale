@@ -1,0 +1,4 @@
+{{ caddy_tailscale_hostname }}.{{ caddy_tailscale_domain }} {
+    respond "hello"
+    tls /certs/{{ caddy_tailscale_hostname }}.crt /certs/{{ caddy_tailscale_hostname }}.key
+}

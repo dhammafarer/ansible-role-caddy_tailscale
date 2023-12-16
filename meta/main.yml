@@ -1,0 +1,20 @@
+---
+dependencies: []
+
+collections:
+  - containers.podman
+
+galaxy_info:
+  role_name: caddy_tailscale
+  author: palekiwi
+  description: Install caddy with a tailscale sidecar in a rootless podman container.
+  license: "license (BSD, MIT)"
+  min_ansible_version: "2.10"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - caddy
+    - tailscale
+    - podman

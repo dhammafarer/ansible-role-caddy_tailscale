@@ -1,0 +1,25 @@
+---
+- name: Converge
+  hosts: all
+
+  vars_files:
+    - vars/main.yml
+    - vars/key.yml
+
+  tasks:
+    - name: Ensure a pod for caddy does not exist.
+      containers.podman.podman_pod:
+        name: "{{ caddy_pod_name }}"
+        state: absent
+
+    - name: Install a Caddyfile.
+      ansible.builtin.template:
+        src: templates/Caddyfile.j2
+        dest: "{{ caddy_volumes_dir }}/Caddyfile"
+        mode: "0644"
+        owner: "{{ caddy_user }}"
+        group: "{{ caddy_user }}"
+
+    - name: "Include palekiwi.caddy_tailscale"
+      ansible.builtin.include_role:
+        name: "palekiwi.caddy_tailscale"

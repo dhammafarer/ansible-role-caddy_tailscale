@@ -1,0 +1,19 @@
+---
+caddy_user: "{{ ansible_user }}"
+caddy_pod_name: caddy
+
+caddy_image_name: "docker.io/library/caddy"
+caddy_image_tag: "latest"
+
+caddy_publish: []
+
+caddy_volumes_dir: "/srv/{{ caddy_pod_name }}"
+
+# tailscale sidecar container
+caddy_tailscale_image_name: "docker.io/tailscale/tailscale"
+caddy_tailscale_image_tag: "latest"
+caddy_tailscale_authkey: ""
+caddy_tailscale_domain: ""
+caddy_tailscale_hostname: "{{ caddy_pod_name }}"
+caddy_tailscale_auth_once: true
+caddy_tailscale_accept_dns: true

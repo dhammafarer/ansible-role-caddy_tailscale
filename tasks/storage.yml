@@ -1,0 +1,14 @@
+---
+- name: Ensure caddy volume directories exist with correct ownership.
+  become: true
+  ansible.builtin.file:
+    path: "{{ caddy_volumes_dir }}/{{ item.path }}"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_user }}"
+    mode: "{{ item.mode }}"
+    state: directory
+  loop:
+    - { path: "config", mode: "0755" }
+    - { path: "data", mode: "0755" }
+    - { path: "certs", mode: "0755" }
+    - { path: "tailscale_state", mode: "0755" }

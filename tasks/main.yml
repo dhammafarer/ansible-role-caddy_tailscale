@@ -1,0 +1,14 @@
+---
+- name: Import security tasks.
+  when: false
+  ansible.builtin.import_tasks: security.yml
+
+- name: Import storage tasks.
+  ansible.builtin.import_tasks: storage.yml
+
+- name: Run tasks under user {{ caddy_user }}.
+  become: true
+  become_user: "{{ caddy_user }}"
+  block:
+    - name: Import caddy container tasks.
+      ansible.builtin.import_tasks: caddy.yml

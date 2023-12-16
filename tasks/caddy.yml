@@ -1,0 +1,70 @@
+---
+- name: Ensure a pod exists for caddy.
+  containers.podman.podman_pod:
+    name: "{{ caddy_pod_name }}"
+    state: created
+    recreate: true
+    publish: "{{ caddy_publish }}"
+
+- name: Ensure a Caddyfile exists.
+  ansible.builtin.file:
+    path: "{{ caddy_volumes_dir }}/Caddyfile"
+    state: touch
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_user }}"
+    mode: "0644"
+
+- name: Ensure caddy container exists.
+  containers.podman.podman_container:
+    pod: "{{ caddy_pod_name }}"
+    name: "{{ caddy_pod_name }}-container"
+    image: "{{ caddy_image_name }}:{{ caddy_image_tag }}"
+    state: created
+    recreate: true
+    restart_policy: always
+    volumes:
+      - "{{ caddy_volumes_dir }}/data:/data:Z"
+      - "{{ caddy_volumes_dir }}/config:/config:Z"
+      - "{{ caddy_volumes_dir }}/Caddyfile:/etc/caddy/Caddyfile:Z"
+      - "{{ caddy_volumes_dir }}/certs:/certs:z"
+
+- name: Ensure tailscale container exists.
+  containers.podman.podman_container:
+    pod: "{{ caddy_pod_name }}"
+    name: "{{ caddy_pod_name }}-tailscale"
+    image: "{{ caddy_tailscale_image_name }}:{{ caddy_tailscale_image_tag }}"
+    state: created
+    recreate: true
+    restart_policy: always
+    volumes:
+      - "{{ caddy_volumes_dir }}/tailscale_state:/state:Z"
+      - "{{ caddy_volumes_dir }}/certs:/certs:Z"
+    env:
+      TS_AUTHKEY: "{{ caddy_tailscale_authkey }}"
+      TS_AUTH_ONCE: "{{ caddy_tailscale_auth_once }}"
+      TS_HOSTNAME: "{{ caddy_tailscale_hostname }}"
+      TS_STATE_DIR: /state
+
+- name: Generate systemd units for {{ caddy_pod_name }}.
+  containers.podman.podman_generate_systemd:
+    name: "{{ caddy_pod_name }}"
+    dest: "/home/{{ caddy_user }}/.config/systemd/user/"
+    restart_policy: "always"
+
+- name: Ensure systemd units are started and enabled for {{ caddy_pod_name }}.
+  ansible.builtin.systemd:
+    scope: user
+    daemon_reload: true
+    name: pod-{{ caddy_pod_name }}
+    enabled: true
+    state: restarted
+
+- name: Ensure tailscale certificates have been issued.
+  ansible.builtin.command:
+    cmd: >
+      podman exec {{ caddy_pod_name }}-tailscale
+      tailscale cert
+      --cert-file /certs/{{ caddy_tailscale_hostname }}.crt
+      --key-file /certs/{{ caddy_tailscale_hostname }}.key
+      {{ caddy_tailscale_hostname }}.{{ caddy_tailscale_domain }}
+    creates: "{{ caddy_volumes_dir }}/certs/{{ caddy_tailscale_hostname }}.crt"

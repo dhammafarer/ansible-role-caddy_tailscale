@@ -1,0 +1,16 @@
+---
+- name: Ensure tailscale container exists.
+  containers.podman.podman_container:
+    pod: "{{ caddy_pod_name }}"
+    name: "{{ caddy_pod_name }}-tailscale"
+    image: "{{ caddy_tailscale_image_name }}:{{ caddy_tailscale_image_tag }}"
+    state: created
+    restart_policy: always
+    volumes:
+      - "{{ caddy_volumes_dir }}/tailscale_state:/state:Z"
+      - "{{ caddy_volumes_dir }}/certs:/certs:Z"
+    env:
+      TS_AUTHKEY: "{{ caddy_tailscale_authkey }}"
+      TS_HOSTNAME: "{{ caddy_tailscale_hostname }}"
+      TS_STATE_DIR: "{{ caddy_tailscale_state_dir }}"
+      TS_AUTH_ONCE: "{{ caddy_tailscale_auth_once }}"

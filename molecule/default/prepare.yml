@@ -1,0 +1,25 @@
+---
+- name: Prepare
+  become: true
+  hosts: all
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: Include epel role.
+      ansible.builtin.include_role:
+        name: palekiwi.epel
+
+    - name: Ensure podman is installed.
+      ansible.builtin.dnf:
+        name: podman
+        state: present
+
+    - name: Ensure a directory exists for caddy volumes.
+      ansible.builtin.file:
+        path: "{{ caddy_volumes_dir }}"
+        state: directory
+        owner: "{{ caddy_user }}"
+        group: "{{ caddy_user }}"
+        mode: "0755"

@@ -1,0 +1,6 @@
+---
+caddy_user: vagrant
+caddy_pod_name: caddy-default
+caddy_volumes_dir: /srv/caddy-default
+caddy_tailscale_hostname: caddy-default
+caddy_tailscale_domain: tail6c0a5.ts.net
